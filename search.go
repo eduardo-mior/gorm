@@ -142,7 +142,7 @@ func (s *search) Offset(offset interface{}) *search {
 	return s
 }
 
-func (s *search) Group(query string) *search {
+func (s *search) Group(query interface{}) *search {
 	s.group = s.getInterfaceAsSQL(query)
 	return s
 }

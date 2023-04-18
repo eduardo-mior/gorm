@@ -280,7 +280,7 @@ func (s *DB) Omit(columns ...string) *DB {
 }
 
 // Group specify the group method on the find
-func (s *DB) Group(query string) *DB {
+func (s *DB) Group(query interface{}) *DB {
 	return s.clone().search.Group(query).db
 }
 
