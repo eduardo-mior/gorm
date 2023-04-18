@@ -795,6 +795,8 @@ func (scope *Scope) orderSQL() string {
 				exp = strings.Replace(exp, "?", scope.AddToVars(arg), 1)
 			}
 			orders = append(orders, exp)
+		} else if isInt := isIntValue(order); isInt {
+			orders = append(orders, fmt.Sprintf("%v", order))
 		}
 	}
 	return " ORDER BY " + strings.Join(orders, ",")
@@ -880,6 +882,14 @@ func (scope *Scope) callCallbacks(funcs []*func(s *Scope)) *Scope {
 		}
 	}
 	return scope
+}
+
+func isIntValue(value interface{}) bool {
+	switch value.(type) {
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		return true
+	}
+	return false
 }
 
 func convertInterfaceToMap(values interface{}, withIgnoredField bool, db *DB) map[string]interface{} {
