@@ -34,6 +34,9 @@ type DB struct {
 	dialect       Dialect
 	singularTable bool
 
+	// current transaction
+	currentTx *DB
+
 	// function to be used to override the creating of a new timestamp
 	nowFuncOverride func() time.Time
 }
@@ -574,6 +577,7 @@ func (s *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) *DB {
 
 		c.dialect.SetDB(c.db)
 		c.AddError(err)
+		s.currentTx = c
 	} else {
 		c.AddError(ErrCantStartTransaction)
 	}
@@ -582,17 +586,22 @@ func (s *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) *DB {
 
 // Commit commit a transaction
 func (s *DB) Commit() *DB {
+	s.currentTx = nil
+
 	var emptySQLTx *sql.Tx
 	if db, ok := s.db.(sqlTx); ok && db != nil && db != emptySQLTx {
 		s.AddError(db.Commit())
 	} else {
 		s.AddError(ErrInvalidTransaction)
 	}
+
 	return s
 }
 
 // Rollback rollback a transaction
 func (s *DB) Rollback() *DB {
+	s.currentTx = nil
+
 	var emptySQLTx *sql.Tx
 	if db, ok := s.db.(sqlTx); ok && db != nil && db != emptySQLTx {
 		if err := db.Rollback(); err != nil && err != sql.ErrTxDone {
@@ -601,12 +610,15 @@ func (s *DB) Rollback() *DB {
 	} else {
 		s.AddError(ErrInvalidTransaction)
 	}
+
 	return s
 }
 
 // RollbackUnlessCommitted rollback a transaction if it has not yet been
 // committed.
 func (s *DB) RollbackUnlessCommitted() *DB {
+	s.currentTx = nil
+
 	var emptySQLTx *sql.Tx
 	if db, ok := s.db.(sqlTx); ok && db != nil && db != emptySQLTx {
 		err := db.Rollback()
@@ -618,6 +630,7 @@ func (s *DB) RollbackUnlessCommitted() *DB {
 	} else {
 		s.AddError(ErrInvalidTransaction)
 	}
+
 	return s
 }
 
@@ -857,6 +870,7 @@ func (s *DB) clone() *DB {
 		blockGlobalUpdate: s.blockGlobalUpdate,
 		dialect:           newDialect(s.dialect.GetName(), s.db),
 		nowFuncOverride:   s.nowFuncOverride,
+		currentTx:         s.currentTx,
 	}
 
 	s.values.Range(func(k, v interface{}) bool {
