@@ -898,6 +898,7 @@ func (s *DB) clone() *DB {
 		dialect:                          newDialect(s.dialect.GetName(), s.db),
 		nowFuncOverride:                  s.nowFuncOverride,
 		currentTx:                        s.currentTx,
+		SQL:                              s.SQL,
 	}
 
 	s.values.Range(func(k, v interface{}) bool {
