@@ -27,6 +27,7 @@ type DB struct {
 	logger            logger
 	search            *search
 	values            sync.Map
+	disableCloseDatabasePanicRecover bool
 
 	// global db
 	parent        *DB
@@ -123,9 +124,27 @@ type closer interface {
 
 // Close close current db connection.  If database connection is not an io.Closer, returns an error.
 func (s *DB) Close() error {
+
+	// Recover panics to ensure the connection always close
+	if !s.disableCloseDatabasePanicRecover {
+		if err := recover(); err != nil {
+
+			if s.currentTx != nil {
+				s.currentTx.Rollback()
+			}
+
+			if db, ok := s.parent.db.(closer); ok {
+				db.Close()
+			}
+
+			panic(err) // Repanic
+		}
+	}
+
 	if db, ok := s.parent.db.(closer); ok {
 		return db.Close()
 	}
+
 	return errors.New("can't close current db")
 }
 
@@ -198,6 +217,13 @@ func (s *DB) BlockGlobalUpdate(enable bool) *DB {
 // HasBlockGlobalUpdate return state of block
 func (s *DB) HasBlockGlobalUpdate() bool {
 	return s.blockGlobalUpdate
+}
+
+// If CloseDatabasePanicRecovery if true, implements a recover in the db.close() function so that if
+// the application results in a panic() the database can be successfully closed
+func (s *DB) DisableAutoRecoverToCloseDatabase(enable bool) *DB {
+	s.disableCloseDatabasePanicRecover = enable
+	return s
 }
 
 // SingularTable use singular table by default
@@ -861,16 +887,17 @@ func (s *DB) GetErrors() []error {
 
 func (s *DB) clone() *DB {
 	db := &DB{
-		db:                s.db,
-		parent:            s.parent,
-		logger:            s.logger,
-		logMode:           s.logMode,
-		Value:             s.Value,
-		Error:             s.Error,
-		blockGlobalUpdate: s.blockGlobalUpdate,
-		dialect:           newDialect(s.dialect.GetName(), s.db),
-		nowFuncOverride:   s.nowFuncOverride,
-		currentTx:         s.currentTx,
+		db:                               s.db,
+		parent:                           s.parent,
+		logger:                           s.logger,
+		logMode:                          s.logMode,
+		Value:                            s.Value,
+		Error:                            s.Error,
+		blockGlobalUpdate:                s.blockGlobalUpdate,
+		disableCloseDatabasePanicRecover: s.disableCloseDatabasePanicRecover,
+		dialect:                          newDialect(s.dialect.GetName(), s.db),
+		nowFuncOverride:                  s.nowFuncOverride,
+		currentTx:                        s.currentTx,
 	}
 
 	s.values.Range(func(k, v interface{}) bool {
