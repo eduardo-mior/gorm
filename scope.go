@@ -1053,6 +1053,34 @@ func (scope *Scope) count(value interface{}) *Scope {
 	return scope
 }
 
+func (scope *Scope) aggregate(selectAggregate string, value interface{}) *Scope {
+	if query, ok := scope.Search.selects["query"]; !ok || !countingQueryRegexp.MatchString(fmt.Sprint(query)) {
+		if len(scope.Search.group) != 0 {
+			scope.prepareQuerySQL()
+			scope.Search = &search{}
+			scope.Search.Select(selectAggregate)
+			scope.Search.Table(fmt.Sprintf("( %s ) AS aggregate_table", scope.SQL))
+		} else {
+			scope.Search.Select(selectAggregate)
+		}
+	}
+
+	scope.Search.ignoreOrderQuery = true
+
+	rows, err := scope.rows()
+	if err != nil {
+		scope.Err(err)
+		return scope
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		scope.Err(scope.db.ScanRows(rows, value))
+	}
+
+	return scope
+}
+
 func (scope *Scope) typeName() string {
 	typ := scope.IndirectValue().Type()
 

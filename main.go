@@ -435,6 +435,11 @@ func (s *DB) Count(value interface{}) *DB {
 	return s.NewScope(s.Value).count(value).db
 }
 
+// Aggregate prepary aggregate query, e.g: `db.Model(&User{}).Aggregate("SUM(age) as total_age")`
+func (s *DB) Aggregate(selectAggregate string, value interface{}) *DB {
+	return s.NewScope(s.Value).aggregate(selectAggregate, value).db
+}
+
 // Related get related associations
 func (s *DB) Related(value interface{}, foreignKeys ...string) *DB {
 	return s.NewScope(s.Value).related(value, foreignKeys...).db
