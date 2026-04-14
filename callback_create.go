@@ -137,13 +137,6 @@ func createCallback(scope *Scope) {
 			if result, err := scope.SQLDB().Exec(scope.SQL, scope.SQLVars...); scope.Err(err) == nil {
 				// set rows affected count
 				scope.db.RowsAffected, _ = result.RowsAffected()
-
-				// set primary value to primary field
-				if primaryField != nil && primaryField.IsBlank {
-					if primaryValue, err := result.LastInsertId(); scope.Err(err) == nil {
-						scope.Err(primaryField.Set(primaryValue))
-					}
-				}
 			}
 			return
 		}
@@ -155,7 +148,7 @@ func createCallback(scope *Scope) {
 				scope.db.RowsAffected, _ = result.RowsAffected()
 
 				// set primary value to primary field
-				if primaryField != nil && primaryField.IsBlank {
+				if primaryField.IsBlank {
 					if primaryValue, err := result.LastInsertId(); scope.Err(err) == nil {
 						scope.Err(primaryField.Set(primaryValue))
 					}

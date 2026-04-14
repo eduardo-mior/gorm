@@ -464,10 +464,10 @@ func (scope *Scope) callMethod(methodName string, reflectValue reflect.Value) {
 }
 
 var (
-	columnRegexp        = regexp.MustCompile("^[a-zA-Z\\d]+(\\.[a-zA-Z\\d]+)*$") // only match string like `name`, `users.name`
-	isNumberRegexp      = regexp.MustCompile("^\\s*\\d+\\s*$")                   // match if string is number
-	comparisonRegexp    = regexp.MustCompile("(?i) (=|<>|(>|<)(=?)|LIKE|IS|IN) ")
-	countingQueryRegexp = regexp.MustCompile("(?i)^count(.+)$")
+	columnRegexp        = regexp.MustCompile(`^[a-zA-Z\d]+(\.[a-zA-Z\d]+)*$`) // only match string like `name`, `users.name`
+	isNumberRegexp      = regexp.MustCompile(`^\s*\d+\s*$`)                   // match if string is number
+	comparisonRegexp    = regexp.MustCompile(`(?i) (=|<>|(>|<)(=?)|LIKE|IS|IN) `)
+	countingQueryRegexp = regexp.MustCompile(`(?i)^count(.+)$`)
 )
 
 func (scope *Scope) quoteIfPossible(str string) string {
@@ -523,10 +523,6 @@ func (scope *Scope) scan(rows *sql.Rows, columns []string, fields []*Field) {
 			field.Field.Set(v)
 		}
 	}
-}
-
-func (scope *Scope) primaryCondition(value interface{}) string {
-	return fmt.Sprintf("(%v.%v = %v)", scope.QuotedTableName(), scope.Quote(scope.PrimaryKey()), value)
 }
 
 func (scope *Scope) buildCondition(clause map[string]interface{}, include bool) (str string) {

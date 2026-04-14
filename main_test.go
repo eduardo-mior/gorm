@@ -31,8 +31,7 @@ import (
 )
 
 var (
-	DB                 *gorm.DB
-	t1, t2, t3, t4, t5 time.Time
+	DB *gorm.DB
 )
 
 func init() {

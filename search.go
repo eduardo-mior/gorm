@@ -53,36 +53,16 @@ func (s *search) clone() *search {
 		Unscoped:         s.Unscoped,
 		ignoreOrderQuery: s.ignoreOrderQuery,
 	}
-	for i, value := range s.whereConditions {
-		clone.whereConditions[i] = value
-	}
-	for i, value := range s.orConditions {
-		clone.orConditions[i] = value
-	}
-	for i, value := range s.notConditions {
-		clone.notConditions[i] = value
-	}
-	for i, value := range s.havingConditions {
-		clone.havingConditions[i] = value
-	}
-	for i, value := range s.joinConditions {
-		clone.joinConditions[i] = value
-	}
-	for i, value := range s.initAttrs {
-		clone.initAttrs[i] = value
-	}
-	for i, value := range s.assignAttrs {
-		clone.assignAttrs[i] = value
-	}
-	for i, value := range s.omits {
-		clone.omits[i] = value
-	}
-	for i, value := range s.orders {
-		clone.orders[i] = value
-	}
-	for i, value := range s.preload {
-		clone.preload[i] = value
-	}
+	copy(clone.whereConditions, s.whereConditions)
+	copy(clone.orConditions, s.orConditions)
+	copy(clone.notConditions, s.notConditions)
+	copy(clone.havingConditions, s.havingConditions)
+	copy(clone.joinConditions, s.joinConditions)
+	copy(clone.initAttrs, s.initAttrs)
+	copy(clone.assignAttrs, s.assignAttrs)
+	copy(clone.omits, s.omits)
+	copy(clone.orders, s.orders)
+	copy(clone.preload, s.preload)
 	return &clone
 }
 

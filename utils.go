@@ -152,10 +152,8 @@ func toSearchableMap(attrs ...interface{}) (result interface{}) {
 	} else if len(attrs) == 1 {
 		if attr, ok := attrs[0].(map[string]interface{}); ok {
 			result = attr
-		}
-
-		if attr, ok := attrs[0].(interface{}); ok {
-			result = attr
+		} else {
+			result = attrs[0]
 		}
 	}
 	return
@@ -188,15 +186,6 @@ func makeSlice(elemType reflect.Type) interface{} {
 	slice := reflect.New(sliceType)
 	slice.Elem().Set(reflect.MakeSlice(sliceType, 0, 0))
 	return slice.Interface()
-}
-
-func strInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }
 
 // getValueFromFields return given fields's value

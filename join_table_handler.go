@@ -199,7 +199,7 @@ func (s JoinTableHandler) JoinWith(handler JoinTableHandlerInterface, db *DB, so
 			keys := scope.getColumnAsArray(foreignFieldNames, scope.Value)
 			values = append(values, toQueryValues(keys))
 		} else {
-			condString = fmt.Sprintf("1 <> 1")
+			condString = "1 <> 1"
 		}
 
 		return db.Joins(fmt.Sprintf("INNER JOIN %v ON %v", quotedTableName, strings.Join(joinConditions, " AND "))).
