@@ -14,9 +14,10 @@ import (
 // NowFunc returns current time, this function is exported in order to be able
 // to give the flexibility to the developer to customize it according to their
 // needs, e.g:
-//    gorm.NowFunc = func() time.Time {
-//      return time.Now().UTC()
-//    }
+//
+//	gorm.NowFunc = func() time.Time {
+//	  return time.Now().UTC()
+//	}
 var NowFunc = func() time.Time {
 	return time.Now()
 }
@@ -64,7 +65,8 @@ type SqlExpr struct {
 }
 
 // Expr generate raw SQL expression, for example:
-//     DB.Model(&product).Update("price", gorm.Expr("price * ? + ?", 2, 100))
+//
+//	DB.Model(&product).Update("price", gorm.Expr("price * ? + ?", 2, 100))
 func Expr(expression string, args ...interface{}) *SqlExpr {
 	return &SqlExpr{expr: expression, args: args}
 }

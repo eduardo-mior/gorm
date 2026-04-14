@@ -21,12 +21,12 @@ type DB struct {
 	RowsAffected int64
 
 	// single db
-	db                SQLCommon
-	blockGlobalUpdate bool
-	logMode           logModeValue
-	logger            logger
-	search            *search
-	values            sync.Map
+	db                               SQLCommon
+	blockGlobalUpdate                bool
+	logMode                          logModeValue
+	logger                           logger
+	search                           *search
+	values                           sync.Map
 	disableCloseDatabasePanicRecover bool
 
 	// global db
